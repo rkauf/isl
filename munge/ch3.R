@@ -8,6 +8,9 @@ library(ISLR)
 library(tidyverse)
 library(tidymodels)
 library(expappr)
+library(ggfortify)
+library(gridExtra)
+library(car)
 
 options(scipen=999)
 
@@ -17,8 +20,11 @@ head(Boston)
 
 lm_fit <- lm(medv ~ lstat, data = Boston)
 
+Boston %>% lm(medv ~ lstat, .) %>% glance()
+
 ## base R model metrics
 summary(lm_fit)
+names(lm_fit)
 
 ## broom methods
 tidy(lm_fit)
@@ -29,3 +35,26 @@ confint(lm_fit)
 
 ## tidy
 confint_tidy(lm_fit)
+
+Boston %>% 
+  lm(medv ~ lstat, .) %>% 
+  augment()
+
+ggplot(Boston, aes(x=lstat, y=medv)) +
+  geom_smooth(method = "lm") +
+  geom_point()
+
+
+#' ## 3.6.3 Multiple Linear Regression
+
+ml_fit <- Boston %>% 
+  lm(medv ~ ., .)
+
+ml_fit %>% summary()
+
+vif(ml_fit)
+
+#' ## 3.6.4 Interaction Terms
+
+## this includes lstat, age, and the interaction between the 2 variable
+summary(lm(medv~lstat*age, data=Boston))
