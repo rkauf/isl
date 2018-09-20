@@ -12,6 +12,7 @@ library(expappr)
 library(ggfortify)
 library(gridExtra)
 library(car)
+library(modelr)
 
 options(scipen=999)
 
@@ -225,7 +226,7 @@ vif(ml_fit)
 
 
 ```r
-## this includes lstat, age, and the interaction between the 2 variable
+## this includes lstat, age, and the interaction between the 2 variables
 summary(lm(medv~lstat*age, data=Boston))
 ```
 
@@ -250,5 +251,340 @@ summary(lm(medv~lstat*age, data=Boston))
 ## Residual standard error: 6.149 on 502 degrees of freedom
 ## Multiple R-squared:  0.5557,	Adjusted R-squared:  0.5531 
 ## F-statistic: 209.3 on 3 and 502 DF,  p-value: < 0.00000000000000022
+```
+
+## 3.6.5 Non-linear transformations of the predictors
+
+
+```r
+ml_quad <- lm(medv ~ lstat + I(lstat^2), data = Boston)
+summary(ml_quad)
+```
+
+```
+## 
+## Call:
+## lm(formula = medv ~ lstat + I(lstat^2), data = Boston)
+## 
+## Residuals:
+##      Min       1Q   Median       3Q      Max 
+## -15.2834  -3.8313  -0.5295   2.3095  25.4148 
+## 
+## Coefficients:
+##              Estimate Std. Error t value            Pr(>|t|)    
+## (Intercept) 42.862007   0.872084   49.15 <0.0000000000000002 ***
+## lstat       -2.332821   0.123803  -18.84 <0.0000000000000002 ***
+## I(lstat^2)   0.043547   0.003745   11.63 <0.0000000000000002 ***
+## ---
+## Signif. codes:  0 '***' 0.001 '**' 0.01 '*' 0.05 '.' 0.1 ' ' 1
+## 
+## Residual standard error: 5.524 on 503 degrees of freedom
+## Multiple R-squared:  0.6407,	Adjusted R-squared:  0.6393 
+## F-statistic: 448.5 on 2 and 503 DF,  p-value: < 0.00000000000000022
+```
+
+```r
+anova(lm_fit, ml_quad)
+```
+
+```
+## Analysis of Variance Table
+## 
+## Model 1: medv ~ lstat
+## Model 2: medv ~ lstat + I(lstat^2)
+##   Res.Df   RSS Df Sum of Sq     F                Pr(>F)    
+## 1    504 19472                                             
+## 2    503 15347  1    4125.1 135.2 < 0.00000000000000022 ***
+## ---
+## Signif. codes:  0 '***' 0.001 '**' 0.01 '*' 0.05 '.' 0.1 ' ' 1
+```
+
+```r
+autoplot(ml_quad)
+```
+
+![plot of chunk autoplot](../graphs/ch3//autoplot-1.png)
+
+```r
+## 5th polynomial
+ml_poly5 <- lm(medv ~ poly(lstat, 5), data = Boston)
+summary(ml_poly5)
+```
+
+```
+## 
+## Call:
+## lm(formula = medv ~ poly(lstat, 5), data = Boston)
+## 
+## Residuals:
+##      Min       1Q   Median       3Q      Max 
+## -13.5433  -3.1039  -0.7052   2.0844  27.1153 
+## 
+## Coefficients:
+##                  Estimate Std. Error t value             Pr(>|t|)    
+## (Intercept)       22.5328     0.2318  97.197 < 0.0000000000000002 ***
+## poly(lstat, 5)1 -152.4595     5.2148 -29.236 < 0.0000000000000002 ***
+## poly(lstat, 5)2   64.2272     5.2148  12.316 < 0.0000000000000002 ***
+## poly(lstat, 5)3  -27.0511     5.2148  -5.187           0.00000031 ***
+## poly(lstat, 5)4   25.4517     5.2148   4.881           0.00000142 ***
+## poly(lstat, 5)5  -19.2524     5.2148  -3.692             0.000247 ***
+## ---
+## Signif. codes:  0 '***' 0.001 '**' 0.01 '*' 0.05 '.' 0.1 ' ' 1
+## 
+## Residual standard error: 5.215 on 500 degrees of freedom
+## Multiple R-squared:  0.6817,	Adjusted R-squared:  0.6785 
+## F-statistic: 214.2 on 5 and 500 DF,  p-value: < 0.00000000000000022
+```
+
+```r
+## log
+summary(lm(medv ~ log(rm), data = Boston))
+```
+
+```
+## 
+## Call:
+## lm(formula = medv ~ log(rm), data = Boston)
+## 
+## Residuals:
+##     Min      1Q  Median      3Q     Max 
+## -19.487  -2.875  -0.104   2.837  39.816 
+## 
+## Coefficients:
+##             Estimate Std. Error t value            Pr(>|t|)    
+## (Intercept)  -76.488      5.028  -15.21 <0.0000000000000002 ***
+## log(rm)       54.055      2.739   19.73 <0.0000000000000002 ***
+## ---
+## Signif. codes:  0 '***' 0.001 '**' 0.01 '*' 0.05 '.' 0.1 ' ' 1
+## 
+## Residual standard error: 6.915 on 504 degrees of freedom
+## Multiple R-squared:  0.4358,	Adjusted R-squared:  0.4347 
+## F-statistic: 389.3 on 1 and 504 DF,  p-value: < 0.00000000000000022
+```
+
+# Excercies
+#### 8
+
+
+```r
+cars_lm <- lm(mpg ~ horsepower , data = Auto)
+summary(cars_lm)
+```
+
+```
+## 
+## Call:
+## lm(formula = mpg ~ horsepower, data = Auto)
+## 
+## Residuals:
+##      Min       1Q   Median       3Q      Max 
+## -13.5710  -3.2592  -0.3435   2.7630  16.9240 
+## 
+## Coefficients:
+##              Estimate Std. Error t value            Pr(>|t|)    
+## (Intercept) 39.935861   0.717499   55.66 <0.0000000000000002 ***
+## horsepower  -0.157845   0.006446  -24.49 <0.0000000000000002 ***
+## ---
+## Signif. codes:  0 '***' 0.001 '**' 0.01 '*' 0.05 '.' 0.1 ' ' 1
+## 
+## Residual standard error: 4.906 on 390 degrees of freedom
+## Multiple R-squared:  0.6059,	Adjusted R-squared:  0.6049 
+## F-statistic: 599.7 on 1 and 390 DF,  p-value: < 0.00000000000000022
+```
+
+There is a strong negative relationship between the predictor and the response
+
+
+```r
+predict(cars_lm, tibble(horsepower = 98))
+```
+
+```
+##        1 
+## 24.46708
+```
+
+```r
+predict(cars_lm, tibble(horsepower = 98), interval = "confidence")
+```
+
+```
+##        fit      lwr      upr
+## 1 24.46708 23.97308 24.96108
+```
+
+```r
+predict(cars_lm, tibble(horsepower = 98), interval = "prediction")
+```
+
+```
+##        fit     lwr      upr
+## 1 24.46708 14.8094 34.12476
+```
+
+```r
+tibble(horsepower = 98) %>% 
+  augment(cars_lm, data = .)
+```
+
+```
+## # A tibble: 392 x 8
+##    horsepower .fitted .se.fit .resid    .hat .sigma    .cooksd .std.resid
+##  *      <dbl>   <dbl>   <dbl>  <dbl>   <dbl>  <dbl>      <dbl>      <dbl>
+##  1         98   19.4    0.297 -1.42  0.00368   4.91 0.000154      -0.289 
+##  2         98   13.9    0.462  1.11  0.00888   4.91 0.000231       0.227 
+##  3         98   16.3    0.384  1.74  0.00613   4.91 0.000391       0.356 
+##  4         98   16.3    0.384 -0.259 0.00613   4.91 0.00000866    -0.0530
+##  5         98   17.8    0.337 -0.838 0.00473   4.91 0.0000696     -0.171 
+##  6         98    8.68   0.652  6.32  0.0177    4.90 0.0152         1.30  
+##  7         98    5.21   0.785  8.79  0.0256    4.89 0.0433         1.82  
+##  8         98    6.00   0.754  8.00  0.0236    4.89 0.0330         1.65  
+##  9         98    4.42   0.815  9.58  0.0276    4.89 0.0557         1.98  
+## 10         98    9.95   0.604  5.05  0.0152    4.91 0.00831        1.04  
+## # ... with 382 more rows
+```
+
+```r
+Auto %>% 
+  augment(cars_lm, .) %>% 
+  ggplot(aes(horsepower, mpg)) +
+  geom_point() +
+  geom_line(aes(x = horsepower, y = .fitted), color = "red")
+```
+
+![plot of chunk unnamed-chunk-5](../graphs/ch3//unnamed-chunk-5-1.png)
+
+```r
+autoplot(cars_lm)
+```
+
+![plot of chunk unnamed-chunk-5](../graphs/ch3//unnamed-chunk-5-2.png)
+
+Seems like the relationship is non-linear, residuals vs fitted shows a U-shaped pattern 
+
+#### 9
+
+
+```r
+pairs(Auto)
+```
+
+![plot of chunk cor_plot](../graphs/ch3//cor_plot-1.png)
+
+```r
+cor(Auto %>%select(-name)) %>% 
+  as.tibble()
+```
+
+```
+## # A tibble: 8 x 8
+##      mpg cylinders displacement horsepower weight acceleration   year
+##    <dbl>     <dbl>        <dbl>      <dbl>  <dbl>        <dbl>  <dbl>
+## 1  1        -0.778       -0.805     -0.778 -0.832        0.423  0.581
+## 2 -0.778     1            0.951      0.843  0.898       -0.505 -0.346
+## 3 -0.805     0.951        1          0.897  0.933       -0.544 -0.370
+## 4 -0.778     0.843        0.897      1      0.865       -0.689 -0.416
+## 5 -0.832     0.898        0.933      0.865  1           -0.417 -0.309
+## 6  0.423    -0.505       -0.544     -0.689 -0.417        1      0.290
+## 7  0.581    -0.346       -0.370     -0.416 -0.309        0.290  1    
+## 8  0.565    -0.569       -0.615     -0.455 -0.585        0.213  0.182
+## # ... with 1 more variable: origin <dbl>
+```
+
+```r
+lm_all <- lm(mpg ~ .-name, data = Auto)
+summary(lm_all)
+```
+
+```
+## 
+## Call:
+## lm(formula = mpg ~ . - name, data = Auto)
+## 
+## Residuals:
+##     Min      1Q  Median      3Q     Max 
+## -9.5903 -2.1565 -0.1169  1.8690 13.0604 
+## 
+## Coefficients:
+##                Estimate Std. Error t value             Pr(>|t|)    
+## (Intercept)  -17.218435   4.644294  -3.707              0.00024 ***
+## cylinders     -0.493376   0.323282  -1.526              0.12780    
+## displacement   0.019896   0.007515   2.647              0.00844 ** 
+## horsepower    -0.016951   0.013787  -1.230              0.21963    
+## weight        -0.006474   0.000652  -9.929 < 0.0000000000000002 ***
+## acceleration   0.080576   0.098845   0.815              0.41548    
+## year           0.750773   0.050973  14.729 < 0.0000000000000002 ***
+## origin         1.426141   0.278136   5.127          0.000000467 ***
+## ---
+## Signif. codes:  0 '***' 0.001 '**' 0.01 '*' 0.05 '.' 0.1 ' ' 1
+## 
+## Residual standard error: 3.328 on 384 degrees of freedom
+## Multiple R-squared:  0.8215,	Adjusted R-squared:  0.8182 
+## F-statistic: 252.4 on 7 and 384 DF,  p-value: < 0.00000000000000022
+```
+
+Displacement, weight, year and origin are all significant predictors
+
+
+```r
+autoplot(lm_all)
+```
+
+![plot of chunk unnamed-chunk-6](../graphs/ch3//unnamed-chunk-6-1.png)
+
+Residuals are a bit fan-shaped and u-shaped, so there's some evidence of a non-linear relationship, but the linear relationship seems to fit fairly well.
+
+
+```r
+## All interactions
+summary(lm(mpg ~ (.-name)^2, data = Auto))
+```
+
+```
+## 
+## Call:
+## lm(formula = mpg ~ (. - name)^2, data = Auto)
+## 
+## Residuals:
+##     Min      1Q  Median      3Q     Max 
+## -7.6303 -1.4481  0.0596  1.2739 11.1386 
+## 
+## Coefficients:
+##                               Estimate   Std. Error t value Pr(>|t|)   
+## (Intercept)                35.47888748  53.13578860   0.668  0.50475   
+## cylinders                   6.98857616   8.24797077   0.847  0.39738   
+## displacement               -0.47853869   0.18935343  -2.527  0.01192 * 
+## horsepower                  0.50343394   0.34699939   1.451  0.14769   
+## weight                      0.00413289   0.01759419   0.235  0.81442   
+## acceleration               -5.85917321   2.17362119  -2.696  0.00735 **
+## year                        0.69743028   0.60967032   1.144  0.25340   
+## origin                    -20.89557040   7.09709051  -2.944  0.00345 **
+## cylinders:displacement     -0.00338326   0.00645510  -0.524  0.60051   
+## cylinders:horsepower        0.01161333   0.02419810   0.480  0.63157   
+## cylinders:weight            0.00035746   0.00089549   0.399  0.69000   
+## cylinders:acceleration      0.27787199   0.16642155   1.670  0.09584 . 
+## cylinders:year             -0.17412586   0.09714126  -1.793  0.07389 . 
+## cylinders:origin            0.40216822   0.49262243   0.816  0.41482   
+## displacement:horsepower    -0.00008491   0.00028846  -0.294  0.76867   
+## displacement:weight         0.00002472   0.00001470   1.682  0.09342 . 
+## displacement:acceleration  -0.00347900   0.00334174  -1.041  0.29853   
+## displacement:year           0.00593380   0.00239072   2.482  0.01352 * 
+## displacement:origin         0.02398113   0.01946528   1.232  0.21875   
+## horsepower:weight          -0.00001968   0.00002924  -0.673  0.50124   
+## horsepower:acceleration    -0.00721274   0.00371945  -1.939  0.05325 . 
+## horsepower:year            -0.00583751   0.00393847  -1.482  0.13916   
+## horsepower:origin           0.00223251   0.02930144   0.076  0.93931   
+## weight:acceleration         0.00023462   0.00022886   1.025  0.30596   
+## weight:year                -0.00022452   0.00021268  -1.056  0.29182   
+## weight:origin              -0.00057885   0.00159117  -0.364  0.71623   
+## acceleration:year           0.05562151   0.02558175   2.174  0.03033 * 
+## acceleration:origin         0.45831610   0.15665969   2.926  0.00365 **
+## year:origin                 0.13925702   0.07398950   1.882  0.06062 . 
+## ---
+## Signif. codes:  0 '***' 0.001 '**' 0.01 '*' 0.05 '.' 0.1 ' ' 1
+## 
+## Residual standard error: 2.695 on 363 degrees of freedom
+## Multiple R-squared:  0.8893,	Adjusted R-squared:  0.8808 
+## F-statistic: 104.2 on 28 and 363 DF,  p-value: < 0.00000000000000022
 ```
 

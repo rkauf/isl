@@ -11,6 +11,7 @@ library(expappr)
 library(ggfortify)
 library(gridExtra)
 library(car)
+library(modelr)
 
 options(scipen=999)
 
@@ -56,5 +57,66 @@ vif(ml_fit)
 
 #' ## 3.6.4 Interaction Terms
 
-## this includes lstat, age, and the interaction between the 2 variable
+## this includes lstat, age, and the interaction between the 2 variables
 summary(lm(medv~lstat*age, data=Boston))
+
+#' ## 3.6.5 Non-linear transformations of the predictors
+
+ml_quad <- lm(medv ~ lstat + I(lstat^2), data = Boston)
+summary(ml_quad)
+
+
+anova(lm_fit, ml_quad)
+#+ autoplot, fig.height = 10, fig.width = 12
+autoplot(ml_quad)
+
+## 5th polynomial
+ml_poly5 <- lm(medv ~ poly(lstat, 5), data = Boston)
+summary(ml_poly5)
+
+
+## log
+summary(lm(medv ~ log(rm), data = Boston))
+
+#' # Excercies
+#' #### 8
+cars_lm <- lm(mpg ~ horsepower , data = Auto)
+summary(cars_lm)
+
+#' There is a strong negative relationship between the predictor and the response
+
+predict(cars_lm, tibble(horsepower = 98))
+predict(cars_lm, tibble(horsepower = 98), interval = "confidence")
+predict(cars_lm, tibble(horsepower = 98), interval = "prediction")
+
+tibble(horsepower = 98) %>% 
+  augment(cars_lm, data = .)
+
+Auto %>% 
+  augment(cars_lm, .) %>% 
+  ggplot(aes(horsepower, mpg)) +
+  geom_point() +
+  geom_line(aes(x = horsepower, y = .fitted), color = "red")
+  
+autoplot(cars_lm)
+
+#' Seems like the relationship is non-linear, residuals vs fitted shows a U-shaped pattern 
+#' 
+#' #### 9
+#+ cor_plot, fig.height = 12, fig.width = 12
+pairs(Auto)
+
+cor(Auto %>%select(-name)) %>% 
+  as.tibble()
+
+lm_all <- lm(mpg ~ .-name, data = Auto)
+summary(lm_all)
+
+#' Displacement, weight, year and origin are all significant predictors
+
+autoplot(lm_all)
+
+#' Residuals are a bit fan-shaped and u-shaped, so there's some evidence of a non-linear relationship, but the linear relationship seems to fit fairly well.
+
+## All interactions
+summary(lm(mpg ~ (.-name)^2, data = Auto))
